@@ -16,16 +16,17 @@ alleleVariants <- c(1:numAlleles)
 
 #creates n number allele variables, all initally equal in frequency
 alleleName <- c()
-freqVector <- c()
+frequencyVector <- c()
+fitnessVector <- c()
 for(i in alleleVariants){
   nam <- paste("p", i, sep = "")
   assign(nam, 1/numAlleles)
   alleleName[i] <- nam
-  freqVector[i] <- 1/numAlleles
-  #designate an allelic fitness coefficient-- these are equally assigned, but they don't have to be
-  alFit <- paste(nam, "Sel", sep = "")
-  assign(alFit, 1)
+  frequencyVector[i] <- 1/numAlleles
+  #creates a selection coefficient vector. can be set as a random number. default at 1 (no selection) 
+  fitnessVector[i] <- 1
 }
+censusVector <- frequencyVector * popNum
 
 #generation counter, intitally set to zero
 gens <- 0
@@ -36,45 +37,49 @@ genTable <- data.frame(matrix(nrow = 0, ncol = numAlleles))
 colnames(genTable) <- alleleName
 
 #binomial sample iterated over n generations until extinction or fix.-------------------------------------
-while(!(1 %in% freqVector)){
-  
+while(!(1 %in% frequencyVector)){
+
   #adds one generation to the counter
   gens <- gens + 1
   
   #adding variable values from previous generation to the dataframe
-  genTable <- rbind(genTable, freqVector)
+  genTable <- rbind(genTable, frequencyVector)
 
-  
   #calculate the fitness-weighted probability
-  pFit <- ((p^2 + ( p * q * ( 1 - (.5 * sel)))) / 
-             (p^2 + (2 * p * q * (1 - (.5*sel))) + (q^2 * (1-sel))))
+  probabilityVector <- (fitnessVector * frequencyVector)/ (sum(fitnessVector * frequencyVector))
   
   #binomial sample of two variants, p and q in this case
-  newDist <- rbinom(1, popNum, pFit)
-  p <- newDist/popNum
-  q <- 1 - p
+  censusVector <- rmultinom(1, popNum, probabilityVector)
+  censusVector <- as.vector(censusVector)
+  frequencyVector <- censusVector/popNum
+
 }
 
+#temporary fix (rename columns)-- while loop rbind command erases the column titles: reason unknown
 colnames(genTable) <- alleleName
 
 #plot the results-----------------------------------------------------------------------------------------
-plot(genTable$p, col="goldenrod2", type = "l", xlab="Generations", ylab="", 
+plot(genTable$p1, type = "l", xlab="Generations", ylab="", 
      ylim= c(0,1), main = " :) ")
-lines(genTable$q, col="cadetblue3", type = "l")
+for(i in numAlleles){
+  lines(genTable[i], type = "l")
+}
+lines(genTable$p2, col = "red", type = "l")
 par(bg= "white")
 legend("right",legend = colnames(genTable),col=c("goldenrod2", "cadetblue3"),bg="white",lwd=3, cex = .8)
 
 #prints generations until fixation or extinction----------------------------------------------------------
-pFix <- 0
-pExt <- 0
-if(p > q){
-  pFix <- 1
-  sprintf("after %g generations, p fixed at 1", gens)
-}else{
-  pExt <- 1
-  sprintf("after %g generations, p went extinct", gens)
-}
 
-lapply(freqVector, )
+
+
+
+
+
+
+
+
+
+
+
 
 
