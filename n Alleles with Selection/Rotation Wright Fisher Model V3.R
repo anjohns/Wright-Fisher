@@ -3,8 +3,6 @@
 
 #NEEDS-- MUTATION/ INTRODUCTION OF NEW ALLELES (THAT WILL NOT BE PART OF THE REPRODUCTIVE POOL)
 
-library(ggplot2)
-
 #set initial conditions------------------------------------------------------------------------------------
 
 #initial population number
