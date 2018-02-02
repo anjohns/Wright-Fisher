@@ -86,6 +86,7 @@ while(!(1 %in% frequencyVector)){
       
       #adds a column to genTable where 
       genTable <- cbind(genTable, frequencyVector[index])
+      genTable[1:(gens - 1), index] <- NA
     }
     
     #adds the new alleles to the sum total of alleles in numAlleles
@@ -123,16 +124,6 @@ while(!(1 %in% frequencyVector)){
   #fitnessVector
   #frequencyVector
 
-}
-
-
-#Cleans up the data table to manage rows that should have no information (rows accomodating mutant-----
-# allelles before they were produced)
-for(q in 1:length(genTable[,1])){
-  if(rowsum(genTable[q]) || 1){
-    #needs to add each element from [,1] to [,n] until the sum reaches 1, and after that the [x,y]
-    #element should be redefined as a null value
-  }
 }
 
 #names columns of genTable 
