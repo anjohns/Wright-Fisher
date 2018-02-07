@@ -1,19 +1,18 @@
 #Andrew Johnson
 #Wright-Fisher model: n alleles, selection
 
-#NEEDS-- MUTATION/ INTRODUCTION OF NEW ALLELES (THAT WILL NOT BE PART OF THE REPRODUCTIVE POOL)
-
 #set initial conditions------------------------------------------------------------------------------------
 
 #initial conditions
-popNum <- 1000
-numAlleles <- 3
+popNum <- 102
+numAlleles <- 5
 mutationRate <- .000005
 
 
 alleleVariants <- c(1:numAlleles)
 theta <- mutationRate*popNum
 alleleName <- c()
+censusVector <- c()
 frequencyVector <- c()
 fitnessVector <- c()
 #generation counter, intitally set to zero
@@ -22,26 +21,38 @@ newNum <- 0
 
 randomizerSet <- c(-1000:1000)
 
+#splits the population close to evenly to establish initial allele distributions
+alleleCensusOtherThanLast <- popNum %/% numAlleles
+lastAlleleCensus <- popNum - (alleleCensusOtherThanLast * (numAlleles - 1))
+
 #throws if allele numer is smaller than 1
 if(numAlleles < 1){
   stop("There has to be at least one allele for this model to function")
 }
 
+
 #creates n number allele variables, all initally equal in frequency
 for(i in alleleVariants){
   #creates a variable name for each allele
   nam <- paste("Allele", i, sep = "")
-  #begins the model with all allele frequencies being equal
-  assign(nam, 1/numAlleles)
+  
+  #begins the model with all allele frequencies being close to equal
+  if(i < numAlleles){
+    assign(nam, (alleleCensusOtherThanLast/popNum))
+    censusVector[i] <- alleleCensusOtherThanLast
+    frequencyVector[i] <- alleleCensusOtherThanLast/popNum
+  }else{
+    assign(nam, (lastAlleleCensus/popNum))
+    censusVector[i] <- lastAlleleCensus
+    frequencyVector[i] <- lastAlleleCensus/popNum
+  }
+  
   #adds the variable name to the name vector (string variable)
   alleleName[i] <- nam
-  #adds allele frequency to the frequency vector
-  frequencyVector[i] <- 1/numAlleles
+  
   #creates a selection coefficient vector. can be set as a random number. default at 1 (no selection) 
   fitnessVector[i] <- 1 + sample(randomizerSet, 1, replace = TRUE)/10000
 }
-
-censusVector <- frequencyVector * popNum
 
 #create data frame of appropriate dimensions--------------------------------------------------------------
 genTable <- data.frame(matrix(nrow = 0, ncol = numAlleles))
@@ -152,16 +163,3 @@ par(bg= "white")
 
 #creates plot legend
 legend("right",legend = colnames(genTable), col = listOfColors, bg="snow",lwd=3, cex = .8)
-
-
-
-#end--------------------------------------------
-
-
-
-
-
-
-
-
-
