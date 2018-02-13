@@ -4,9 +4,9 @@
 #set initial conditions------------------------------------------------------------------------------------
 
 #initial conditions
-popNum <- 102
-numAlleles <- 5
-mutationRate <- .000005
+popNum <- 1000
+numAlleles <- 6
+mutationRate <- .00005
 
 
 alleleVariants <- c(1:numAlleles)
@@ -132,8 +132,10 @@ while(!(1 %in% frequencyVector)){
   #censusVector append numNew 1's to end of censusVector
   frequencyVector <- censusVector/popNum
   
-  #fitnessVector
-  #frequencyVector
+  #if(any census number in censusvector is 0){
+  #   set that census and freq index to NULL -- something like genTable[X, Y] <- NA
+  #   This should be conserved for each subsequent generation
+  #}
 
 }
 
