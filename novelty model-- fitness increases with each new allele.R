@@ -4,14 +4,15 @@
 
 library(beepr)
 
+
 #novelty model
 #freq dep
 
 #set initial conditions------------------------------------------------------------------------------------
 
 #initial parameters
-popNum <- 100
-numAlleles <- 4
+popNum <- 1000
+numAlleles <- 3
 mutationRate <- .00005
 generations <- 10000
 
@@ -145,11 +146,6 @@ for(e in 1:generations){
   #censusVector append numNew 1's to end of censusVector
   frequencyVector <- censusVector/popNum
   
-  #if(any census number in censusvector is 0){
-  #   set that census and freq index to NULL -- something like genTable[X, Y] <- NA
-  #   This should be conserved for each subsequent generation
-  #}
-  
 }
 
 #names columns of genTable 
@@ -157,29 +153,14 @@ colnames(genTable) <- alleleName
 
 #plot the results-----------------------------------------------------------------------------------------
 
-
-#vector of colors-- fourteen colors listed here to handle up to fourteen alleles. should be expanded 
-#if additional alleles need to be visualized
-listOfColors <- c("cyan3", "darkgoldenrod2", "coral2", "deepskyblue3", "firebrick", "darkgreen", "lightpink2",
-                  "seagreen", "tan3", "sienna3", "aquamarine2", "orangered3", "mediumseagreen",
-                  "slateblue")
-
 #creates a plot
-plot(genTable$Allele1, type = "l", lwd = 1, xlab="Generations", ylab="", 
-     ylim= c(0,1), xlim = NULL, col = listOfColors[1], main = " :) ")
-
-#cycles through each column of genTable and adds it to the plot
-for(k in alleleVariants){
-  lines(genTable[k], col = listOfColors[k], type = "l", lwd = 1)
-}
+matplot(y = genTable, type = 'l', lty = 1)
 
 #plot background color
 par(bg= "white")
 
-#creates plot legend
-legend("right",legend = colnames(genTable), col = listOfColors, bg="snow",lwd=3, cex = .8)
 
-
+#Signals that the code is finished
 beep()
 
 
