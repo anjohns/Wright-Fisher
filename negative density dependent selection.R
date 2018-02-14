@@ -1,35 +1,28 @@
 #Andrew Johnson
-#Wright-Fisher model: toy selection (increasing fitness with each new allele)
-#alleles, selection, mutation
+#Wright-Fisher model: negative density dependent selection (alleles at smaller freq. have higher fitnesses)
 
 library(beepr)
-
-
-#novelty model
-#freq dep
 
 #set initial conditions------------------------------------------------------------------------------------
 
 #initial parameters
-popNum <- 100
+popNum <- 1000
 numAlleles <- 3
 mutationRate <- .00005
-generations <- 1000
+generations <- 10000
 
 alleleVariants <- c(1:numAlleles)
 theta <- mutationRate*popNum
 alleleName <- c()
 censusVector <- c()
+censusVectorNA <- c()
 frequencyVector <- c()
 fitnessVector <- c()
 
 #counter, intitally set to zero
 gens <- 0
 newNum <- 0
-fitnessIncrementer <- 0
 
-#this variable increases with each successive allele type
-fitnessDivisor <- 10
 randomizerSet <- c(-1000:1000)
 
 #splits the population close to evenly to establish initial allele distributions
@@ -63,15 +56,14 @@ for(i in alleleVariants){
   
   #creates a selection coefficient vector. in this model each successive allele will be more fit
   # than the last. default at 1  
-  fitnessVector[i] <- 1 + fitnessIncrementer/fitnessDivisor
-  
-  fitnessIncrementer <- fitnessIncrementer + 1
+  fitnessVector[i] <- 1 + 1/censusVector
+
 }
 
 #create data frame of appropriate dimensions--------------------------------------------------------------
 genTable <- data.frame(matrix(nrow = 0, ncol = numAlleles))
 
-#multinomial sample iterated over n generations until extinction or fix.----------------------------------
+#multinomial sample iterated over n generations-----------------------------------------------------------
 
 for(e in 1:generations){
   
@@ -101,9 +93,8 @@ for(e in 1:generations){
       
       #creates a selection coefficient vector. here set randomly
       #the mutants are given a higher fitness here for interesting results
-      fitnessVector[index] <- 1 + fitnessIncrementer/fitnessDivisor
+      fitnessVector[index] <- 1 + 1/censusVector[index]
       
-      fitnessIncrementer <- fitnessIncrementer + 1
       #----updates number of variants to include the new mutant and adds a column for the new variable----
       #updates allele variants range
       alleleVariants[index] <- index
@@ -142,20 +133,27 @@ for(e in 1:generations){
   #multinomial sample to update the next generation distribution of alleles
   censusVector <- rmultinom(1, (popNum - newNum), probabilityVector)
   censusVector <- as.vector(censusVector)
+  censusVectorNA <- replace(censusVector, censusVector==0, NA)
   
   #censusVector append numNew 1's to end of censusVector
   frequencyVector <- censusVector/popNum
+  
+  fitnessVector <- 1 + 1/censusVectorNA
+  fitnessVector <- replace(fitnessVector, is.na(fitnessVector), 0)
   
 }
 
 #names columns of genTable 
 colnames(genTable) <- alleleName
 
+#replace all 0's in gentable with null values
+genTable[genTable == 0] <- NA
+
 #plot the results-----------------------------------------------------------------------------------------
 
 #creates a plot
 matplot(y = genTable, type = 'l', lty = 1, xlab = "Generations", ylab = "Frequency", 
-        main = "Novelty Selection")
+        main = "Negative Density Dependent Fitness")
 
 #plot background color
 par(bg= "white")
