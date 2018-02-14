@@ -1,5 +1,5 @@
 #Andrew Johnson
-#Wright-Fisher model: negative density dependent selection (alleles at smaller freq. have higher fitnesses)
+#Wright-Fisher model: negative frequency dependent selection (alleles at smaller freq. have higher fitnesses)
 
 library(beepr)
 
@@ -153,7 +153,7 @@ genTable[genTable == 0] <- NA
 
 #creates a plot
 matplot(y = genTable, type = 'l', lty = 1, xlab = "Generations", ylab = "Frequency", 
-        main = "Negative Density Dependent Fitness")
+        main = "Negative Frequency Dependent Fitness")
 
 #plot background color
 par(bg= "white")
