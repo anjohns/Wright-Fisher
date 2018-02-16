@@ -11,10 +11,10 @@ library(beepr)
 #set initial conditions------------------------------------------------------------------------------------
 
 #initial parameters
-popNum <- 100
+popNum <- 1000
 numAlleles <- 3
-mutationRate <- .00005
-generations <- 1000
+mutationRate <- .0005
+generations <- 5000
 
 alleleVariants <- c(1:numAlleles)
 theta <- mutationRate*popNum
@@ -69,7 +69,7 @@ for(i in alleleVariants){
 }
 
 #create data frame of appropriate dimensions--------------------------------------------------------------
-genTable <- data.frame(matrix(nrow = 0, ncol = numAlleles))
+genTable <- data.frame(matrix(nrow = generations, ncol = numAlleles))
 
 #multinomial sample iterated over n generations until extinction or fix.----------------------------------
 
@@ -123,14 +123,10 @@ for(e in 1:generations){
   #--machinery reshaping the population, frequency, and probability distributions--------
   
   #adding variable values from previous generation to the dataframe
-  genTable <- rbind(genTable, frequencyVector)
+  genTable[e,] <- frequencyVector
   
   #prevents frequencies from being lower than 1/N
-  for(z in 1:length(numAlleles)){
-    if(frequencyVector[z] < 1/popNum){
-      frequencyVector[z] <- 0
-    }
-  }
+  replace(frequencyVector, (frequencyVector < (1/popNum)), 0)
   
   #calculate the fitness-weighted probability
   probabilityVector <- (fitnessVector * frequencyVector)/ (sum(fitnessVector * frequencyVector))
@@ -159,7 +155,6 @@ matplot(y = genTable, type = 'l', lty = 1, xlab = "Generations", ylab = "Frequen
 
 #plot background color
 par(bg= "white")
-
 
 #Signals that the code is finished
 beep()

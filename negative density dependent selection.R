@@ -2,14 +2,20 @@
 #Wright-Fisher model: negative frequency dependent selection (alleles at smaller freq. have higher fitnesses)
 
 library(beepr)
+library(data.table)
+
+#parameterized curve like a parabola 
+#run with theya higher
+#compare the shape of the success curves between models
+
 
 #set initial conditions------------------------------------------------------------------------------------
 
 #initial parameters
 popNum <- 1000
 numAlleles <- 3
-mutationRate <- .00005
-generations <- 10000
+mutationRate <- .0005
+generations <- 5000
 
 alleleVariants <- c(1:numAlleles)
 theta <- mutationRate*popNum
@@ -56,12 +62,12 @@ for(i in alleleVariants){
   
   #creates a selection coefficient vector. in this model each successive allele will be more fit
   # than the last. default at 1  
-  fitnessVector[i] <- 1 + 1/censusVector
+  fitnessVector[i] <- 1 + 1/censusVector[i]
 
 }
 
 #create data frame of appropriate dimensions--------------------------------------------------------------
-genTable <- data.frame(matrix(nrow = 0, ncol = numAlleles))
+genTable <- data.frame(matrix(nrow = generations, ncol = numAlleles))
 
 #multinomial sample iterated over n generations-----------------------------------------------------------
 
@@ -114,14 +120,10 @@ for(e in 1:generations){
   #--machinery reshaping the population, frequency, and probability distributions--------
   
   #adding variable values from previous generation to the dataframe
-  genTable <- rbind(genTable, frequencyVector)
+  genTable[e,] <- frequencyVector
   
   #prevents frequencies from being lower than 1/N
-  for(z in 1:length(numAlleles)){
-    if(frequencyVector[z] < 1/popNum){
-      frequencyVector[z] <- 0
-    }
-  }
+  replace(frequencyVector, (frequencyVector < (1/popNum)), 0)
   
   #calculate the fitness-weighted probability
   probabilityVector <- (fitnessVector * frequencyVector)/ (sum(fitnessVector * frequencyVector))
@@ -158,9 +160,10 @@ matplot(y = genTable, type = 'l', lty = 1, xlab = "Generations", ylab = "Frequen
 #plot background color
 par(bg= "white")
 
+matplot(y= genTable$Allele149, type = 'l', lty = 1, xlab = "Generations", ylab = "Frequency", 
+        main = "Neg Freq Dep Fitness, zoomed", xlim = c(300,500))
 
 #Signals that the code is finished
 beep()
-
 
 
