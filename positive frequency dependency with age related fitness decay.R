@@ -75,7 +75,10 @@ fitnessVector <- 1 + (frequencyVector / (frequencyVector + freqDepCoefficient))
 #create data frame of appropriate dimensions--------------------------------------------------------------
 genTable <- data.frame(matrix(nrow = generations, ncol = numAlleles))
 
+
+##########################################################################################################
 #multinomial sample iterated over n generations-----------------------------------------------------------
+##########################################################################################################
 
 for(e in 1:generations){
   
@@ -83,7 +86,10 @@ for(e in 1:generations){
   gens <- gens + 1
   ageVector <- ageVector + 1
   
-  #machinery for adding new mutant alleles to the model-------------
+  
+  #######################################################################################
+  # machinery for adding new mutant alleles to the model -------------###################
+  #######################################################################################
   if(newNum > 0){
     for(j in 1:newNum){
       index <- j + numAlleles
@@ -126,7 +132,9 @@ for(e in 1:generations){
     newNum <- 0
   }
   
+  #######################################################################################
   #--machinery reshaping the population, frequency, and probability distributions--------
+  #######################################################################################
   
   #adding variable values from previous generation to the dataframe
   genTable[e,] <- frequencyVector
@@ -149,7 +157,10 @@ for(e in 1:generations){
   #censusVector append numNew 1's to end of censusVector
   frequencyVector <- censusVector/popNum
   
-  fitnessVector <- (1 + (frequencyVector / (frequencyVector + freqDepCoefficient))) / ageVector
+
+  #fitnesses are calculated in the form [1 + f(x)] / decay rate, where f(x) is positive curve
+  #the logic being, as a type ages, it becomes less fit despite it's original fitness
+  fitnessVector <- (1 + (frequencyVector / (frequencyVector + freqDepCoefficient))) / (ageVector^.5)
   fitnessVector <- replace(fitnessVector, is.na(fitnessVector), 0)
   
 }
@@ -160,7 +171,10 @@ colnames(genTable) <- alleleName
 #replace all 0's in gentable with null values
 genTable[genTable == 0] <- NA
 
+
+##########################################################################################################
 #plot the results-----------------------------------------------------------------------------------------
+##########################################################################################################
 
 #creates a plot
 matplot(y = genTable, type = 'l', lty = 1, xlab = "Generations", ylab = "Frequency", 
@@ -172,6 +186,7 @@ par(bg= "white")
 matplot(y= genTable$Allele70, type = 'l', lty = 1, xlab = "Generations", ylab = "Frequency", 
         main = "Pos Freq Dep Fitness Age Decay, zoomed", xlim = c(115,140))
 
-#Signals that the code is finished
+##########################################################################################################
+#Signals that the code is finished########################################################################
 beep()
 
