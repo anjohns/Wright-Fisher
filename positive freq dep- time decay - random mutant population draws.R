@@ -1,6 +1,8 @@
 #Andrew Johnson
 #Wright-Fisher model: positive frequency dependent selection (alleles at smaller freq. have lower fitnesses)
 #                     time decay built in
+#                     Attempt at random draw of mutant populations (number of types is alread implemented, but
+#                     here I will add a random draw of a population size of each type)
 
 library(beepr)
 library(data.table)
@@ -29,12 +31,11 @@ censusVectorNA <- c()
 frequencyVector <- c()
 fitnessVector <- c()
 ageVector <- c()
+mutantPopNum <- c()
 
 #counter, intitally set to zero
 gens <- 0
 newNum <- 0
-
-randomizerSet <- c(-1000:1000)
 
 #splits the population close to evenly to establish initial allele distributions
 alleleCensusOtherThanLast <- popNum %/% numAlleles
@@ -100,7 +101,7 @@ for(e in 1:generations){
       nam <- paste("Allele", index, sep = "")
       
       #mutated allele begins as a single individual in the population
-      assign(nam, 1/popNum)
+      assign(nam, mutantPopNum[j])
       
       #adds the variable name to the name vector (string variable)
       alleleName[index] <- nam
@@ -109,7 +110,7 @@ for(e in 1:generations){
       
       #----updates census, frequency, and selection vector------
       #updates censusVector to include new mutants
-      censusVector[index] <- 1
+      censusVector[index] <- mutantPopNum[j]
       
       #adds allele frequency to the frequency vector
       frequencyVector[index] <- censusVector[index]/popNum
@@ -130,15 +131,16 @@ for(e in 1:generations){
     #adds the new alleles to the sum total of alleles in numAlleles
     numAlleles <- numAlleles + newNum
     
-    #resets newNum for the next iteration
+    #resets newNum and mutantPopNum for the next iteration
     newNum <- 0
+    mutantPopNum <- c()
   }
   
   #######################################################################################
   #--machinery reshaping the population, frequency, and probability distributions--------
   #######################################################################################
   
-  #adding variable values from previous generation to the dataframe
+  #adds variable values from previous generation to the dataframe
   genTable[e,] <- frequencyVector
   
   #prevents frequencies from being lower than 1/N
@@ -151,15 +153,21 @@ for(e in 1:generations){
   #theta is the mutation rate and the number of alleles is a poisson draw with mean = theta
   newNum <- rpois(1, theta)
   
+  #randomly draws the new mutants population size. This is to simulate variable popularity of events, 
+  # e.g. national news vs. local news
+  if(newNum > 0){
+    mutantPopNum <- rpois(newNum, popNum/5)
+  }
+  
   #multinomial sample to update the next generation distribution of alleles
-  censusVector <- rmultinom(1, (popNum - newNum), probabilityVector)
+  censusVector <- rmultinom(1, (popNum - sum(mutantPopNum)), probabilityVector)
   censusVector <- as.vector(censusVector)
   censusVectorNA <- replace(censusVector, censusVector==0, NA)
   
   #censusVector append numNew 1's to end of censusVector
   frequencyVector <- censusVector/popNum
   
-
+  
   #fitnesses are calculated in the form [1 + f(x)] / decay rate, where f(x) is freq/ (freq + y) positive curve
   #the logic being, as a type ages, it becomes less fit despite it's original fitness
   fitnessVector <- (1 + (frequencyVector / (frequencyVector + freqDepCoefficient))) / (ageVector^.5)
@@ -180,13 +188,14 @@ genTable[genTable == 0] <- NA
 
 #creates a plot
 matplot(y = genTable, type = 'l', lty = 1, xlab = "Generations", ylab = "Frequency", 
-        main = "Positive Frequency Dependence Age Decay")
+        main = "Positive Frequency Dependence", sub = "Age Decay and Random Mutant Draw")
 
 #plot background color
 par(bg= "white")
 
-#matplot(y= genTable, type = 'l', lty = 1, xlab = "Generations", ylab = "Frequency", 
-#        main = "Pos Freq Dep Fitness Age Decay, zoomed", xlim = c(400,470))
+matplot(y= genTable, type = 'l', lty = 1, xlab = "Generations", ylab = "Frequency", 
+        main = "Positive Frequency Dependence Zoomed", sub = "Age Decay and Random Mutant Draw"
+        , xlim = c(400,470))
 
 ##########################################################################################################
 #Signals that the code is finished########################################################################
